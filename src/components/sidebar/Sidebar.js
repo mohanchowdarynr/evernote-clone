@@ -164,16 +164,7 @@ const Sidebar = ({ notes, selectedNoteIndex, selectNote, deleteNote, newNote }) 
                       })}
               </List>
           </div>
-          {/* {user && (
-      <div className={classes.userInfoPanel}>
-        
-        <Exit
-          onClick={handlelogout}
-          className={classes.logoutIcon}
-          titleAccess={"Logout"}
-        />
-      </div>
-    )} */}
+         
       </div>
   );
 };

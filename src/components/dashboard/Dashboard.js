@@ -66,7 +66,7 @@ const Dashboard = () => {
     const newFromDB = await projectFirestore.collection("notes").add({
       title,
       body: note.body,
-    //   author: user.email,
+    
     });
     const newId = newFromDB.id;
     setNotes([...notes, note]);
@@ -99,14 +99,12 @@ const Dashboard = () => {
       await projectFirestore.collection("notes").doc(id).update({
         title: note.title,
         body: note.body,
-        // author: user.email,
+        
       });
     }
   };
 
-//   if (!user) {
-//     return <Redirect to="/" />;
-//   }
+
   return (
     <div className="app-container">
       <Sidebar
