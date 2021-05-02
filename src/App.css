@@ -1,39 +1,27 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-    monospace;
-}
-body,
-html {
+html, body {
+  height: 100%;
   width: 100%;
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
   overflow: hidden;
 }
-#evernote-container,
-.app-container,
-body,
-html {
+#root {
+  height: 100%;
+  box-sizing: border-box;
+}
+.app-container {
   height: 100%;
   box-sizing: border-box;
 }
 .quill {
-  height: 100vh;
+  height: 100%;
+  box-sizing: border-box;
   width: calc(100% - 300px);
   float: left;
 }
-.ql-container,
-.quill {
-  box-sizing: border-box;
-}
 .ql-container {
+  box-sizing: border-box;
   height: calc(100% - 42px);
   overflow-y: scroll;
 }
@@ -41,7 +29,7 @@ html {
   cursor: text;
 }
 .MuiListItem-root.Mui-selected {
-  background-color: #d4d8e8 !important;
+  background-color:#FCA5A5 !important;
 }
 .no-note-selected {
   font-size: 48px;
