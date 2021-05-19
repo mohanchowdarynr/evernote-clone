@@ -1,72 +1,96 @@
-import React from 'react';
-import ReactQuill from 'react-quill';
-import debounce from '../helper';
-import BorderColorIcon from '@material-ui/icons/BorderColor';
-import { withStyles } from '@material-ui/core/styles';
-import styles from './styles';
+import { useState, useEffect, useRef } from 'react';
+import Quill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+import { MdTitle } from 'react-icons/md';
+import { Box } from '@chakra-ui/layout';
+import { AiOutlineFullscreen, AiOutlineFullscreenExit } from 'react-icons/ai';
 
-class EditorComponent extends React.Component {
-  constructor() {
-    super();
-    this.state = {
-      text: '',
-      title: '',
-      id: ''
-    };
-  }
+const TOOLBAR_OPTIONS = [
+  [{ header: [1, 2, 3, 4, 5, 6, false] }],
+  [{ font: [] }],
+  ['bold', 'italic', 'underline'],
+  [{ list: 'ordered' }, { list: 'bullet' }],
+  [{ indent: '-1' }, { indent: '+1' }],
+  [{ direction: 'rtl' }],
+  [{ color: [] }, { background: [] }],
+  [{ script: 'sub' }, { script: 'super' }],
+  [{ align: [] }],
+  ['link', 'image', 'blockquote', 'code-block'],
+  ['clean'],
+];
 
-  componentDidMount = () => {
-    this.setState({
-      text: this.props.selectedNote.body,
-      title: this.props.selectedNote.title,
-      id: this.props.selectedNote.id
-    });
-  }
+const Editor = ({ selectedNote, noteUpdate }) => {
+  const [body, setBody] = useState('');
+  const [title, setTitle] = useState('');
+  const [id, setId] = useState('');
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const ref = useRef(null);
 
-  componentDidUpdate = () => {
-    if(this.props.selectedNote.id !== this.state.id) {
-      this.setState({
-        text: this.props.selectedNote.body,
-        title: this.props.selectedNote.title,
-        id: this.props.selectedNote.id
-      });
-    }
-  }
+  useEffect(() => {
+    setBody(selectedNote.body);
+    setTitle(selectedNote.title);
+    setId(selectedNote.id);
+  }, [selectedNote]);
 
-  render() {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      noteUpdate(id, { title, body });
+    }, 1500);
 
-    const { classes } = this.props;
+    return () => clearTimeout(timer);
+  }, [noteUpdate, title, body, id]);
 
-    return(
-      <div className={classes.editorContainer}>
-        <BorderColorIcon className={classes.editIcon}></BorderColorIcon>
-        <input
-          className={classes.titleInput}
-          placeholder='Note title...'
-          value={this.state.title ? this.state.title : ''}
-          onChange={(e) => this.updateTitle(e.target.value)}>
-        </input>
-        <ReactQuill 
-          value={this.state.text} 
-          onChange={this.updateBody}>
-        </ReactQuill>
-      </div>
-    );
-  }
-  updateBody = async (val) => {
-    await this.setState({ text: val });
-    this.update();
+  const updateBody = (val) => {
+    setBody(val);
   };
-  updateTitle = async (txt) => {
-    await this.setState({ title: txt });
-    this.update();
-  }
-  update = debounce(() => {
-    this.props.noteUpdate(this.state.id, {
-      title: this.state.title,
-      body: this.state.text
-    })
-  }, 1500);
-}
 
-export default withStyles(styles)(EditorComponent);
+  const updateTitle = (val) => {
+    setTitle(val);
+  };
+
+  const handleFullscreen = () => {
+    if (ref.current) {
+      if (document.fullscreenElement === null) {
+        ref.current.requestFullscreen();
+        setIsFullscreen(true);
+      } else {
+        document.exitFullscreen();
+        setIsFullscreen(false);
+      }
+    }
+  };
+
+  return (
+    <Box ref={ref} bg='white'>
+      <Box className='editor-container'>
+        <Box className='editor-header'>
+          <Box className='editor-titleicon'>
+            <MdTitle className='icon' />
+          </Box>
+          <input
+            className='editor-title'
+            value={title ? title : ''}
+            onChange={(e) => updateTitle(e.target.value)}
+          />
+
+          <Box onClick={handleFullscreen} className='editor-fullscreen'>
+            {isFullscreen ? (
+              <AiOutlineFullscreenExit className='icon' />
+            ) : (
+              <AiOutlineFullscreen className='icon' />
+            )}
+          </Box>
+        </Box>
+        <Quill
+          theme='snow'
+          value={body}
+          style={{ height: '87vh' }}
+          onChange={updateBody}
+          modules={{ toolbar: TOOLBAR_OPTIONS }}
+        />
+      </Box>
+    </Box>
+  );
+};
+
+export default Editor;

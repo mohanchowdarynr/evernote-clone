@@ -1,80 +1,114 @@
 import React from 'react';
-import { withStyles } from '@material-ui/core/styles';
-import styles from './styles';
-import List from '@material-ui/core/List';
-import { Divider, Button } from '@material-ui/core';
-import SidebarItemComponent from '../sidebaritem/sidebaritem';
+import { AiFillDelete, AiOutlineShareAlt } from 'react-icons/ai';
+import {
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  Divider,
+  Box,
+  Center,
+  Button,
+  Flex,
+  Text,
+  useDisclosure,
+  Link,
+} from '@chakra-ui/react';
+import './Sidebar.css';
+import { removeHTMLTags } from '../helper';
+import { AiFillFileAdd, AiOutlineLogout } from 'react-icons/ai';
+import { auth } from '../firebase';
 
-class SidebarComponent extends React.Component {
-  constructor() {
-    super();
-    this.state = {
-      addingNote: false,
-      title: null
-    };
-  }
-  render() {
+const Sidebar = ({
+  newNote,
+  adding,
+  notes,
+  selectNote,
+  shareHandler,
+  id,
+  deleteNote,
+}) => {
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
-    const { notes, classes, selectedNoteIndex } = this.props;
+  const signOut = () => {
+    auth.signOut();
+  };
 
-    if(notes) {
-      return(
-        <div className={classes.sidebarContainer}>
-          <Button
-            onClick={this.newNoteBtnClick}
-            className={classes.newNoteBtn}>{this.state.addingNote ? 'Cancel' : 'New Note'}</Button>
-            {
-              this.state.addingNote ? 
-              <div>
-                <input type='text'
-                  className={classes.newNoteInput}
-                  placeholder='Title'
-                  onKeyUp={(e) => this.updateTitle(e.target.value)}>
-                </input>
-                <Button 
-                  className={classes.newNoteSubmitBtn}
-                  onClick={this.newNote}>Submit</Button>
-              </div> :
-              null
-            }
-            <List>
-              {
-                notes.map((_note, _index) => {
-                  return(
-                    <div key={_index}>
-                      <SidebarItemComponent
-                        _note={_note}
-                        _index={_index}
-                        selectedNoteIndex={selectedNoteIndex}
-                        selectNote={this.selectNote}
-                        deleteNote={this.deleteNote}>
-                      </SidebarItemComponent>
-                      <Divider></Divider>
-                    </div>
-                  )
-                })
-              }
-            </List>
-        </div>
-      );
-    } else {
-      return(<div></div>);
+  const handleDeleteNote = (n) => {
+    if (window.confirm(`Are you sure you want to delete: ${n.title}`)) {
+      deleteNote(n);
     }
-  }
+  };
 
-  newNoteBtnClick = () => {
-    this.setState({ title: null, addingNote: !this.state.addingNote });
-  }
-  updateTitle = (txt) => {
-    this.setState({ title: txt });
-  }
-  newNote = () => {
-    this.props.newNote(this.state.title);
-    this.setState({ title: null, addingNote: false });
-  }
-  selectNote = (n, i) => this.props.selectNote(n, i);
-  deleteNote = (note) => this.props.deleteNote(note);
+  return (
+    <Box>
+      <Center className='add-notes'>
+        <Text className='sidebar-title'>
+          <Link href='/'>Evernote</Link>
+        </Text>
+        <button onClick={newNote} disabled={adding} className='add-btn'>
+          <AiFillFileAdd className='icon' />
+        </button>
+        <button onClick={signOut} disabled={adding} className='add-btn'>
+            <AiOutlineLogout className='icon' />
+          </button>
+      </Center>
 
-}
+      <Box mt={16}>
+        {notes &&
+          notes.map((n) => (
+            <Box key={n.id} pl='5px'>
+              <Box className='all-notes'>
+                <Box>
+                  <Text cursor='pointer' onClick={() => selectNote(n)}>
+                    {n.title}
+                  </Text>
+                  <Text mt={4}>{removeHTMLTags(n.body).slice(0, 15)}...</Text>
+                </Box>
+                <Flex>
+                  <Box pr={2}>
+                    <AiOutlineShareAlt
+                      className='icon'
+                      onClick={() => shareHandler(n.id, onOpen)}
+                    />
+                  </Box>
+                  <Box pl={2}>
+                    <AiFillDelete
+                      className='icon'
+                      onClick={() => handleDeleteNote(n)}
+                    />
+                  </Box>
+                </Flex>
+              </Box>
+              <Divider colorScheme="blackAlpha" />
+            </Box>
+          ))}
+      </Box>
 
-export default withStyles(styles)(SidebarComponent);
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Share Note</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Text fontWeight={700}>Sharable Link:</Text>
+            <Text>{`${window.location.href}note/${auth.currentUser.uid}/${id}`}</Text>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button colorScheme='gray' onClick={onClose}>
+              Close
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+     
+    </Box>
+  );
+};
+
+export default Sidebar;
