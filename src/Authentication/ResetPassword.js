@@ -5,8 +5,7 @@ const ResetPassword = ({ setEmail, setToggle, resetPassword }) => {
   return (
     <Box className='login'>
       <Box className='card'>
-        <Text className='login-header'>Notify</Text>
-        <Text className='login-desc'>Simple And Best Note Taking App</Text>
+        <Text className='login-header'>Evernote</Text>
         <Box className='email-login'>
           <label>
             <b>Email</b>
